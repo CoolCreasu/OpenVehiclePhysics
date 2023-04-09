@@ -228,7 +228,7 @@ namespace OVP.VehicleSystems
             // Update slip angle dynamic based on slip angle, local velocity along the X-axis, delta time, and a time-based interpolation factor
             _slipAngleDynamic = Mathf.Clamp(_slipAngleDynamic + ((slipAngle - _slipAngleDynamic) * Mathf.Clamp01(Mathf.Abs(_localVelocity.x) / 0.01f * _deltaTime)), -90.0f, 90.0f);
             // Calculate slipX, which is the lateral slip, based on slip angle dynamic and slip angle peak, clamped between -1.0f and 1.0f
-            _slipX = Mathf.Clamp(_slipAngleDynamic / _slipAnglePeak, -1.0f, 1.0f);
+            _slipX = Mathf.Clamp(MathExtensions.SafeDivide(_slipAngleDynamic, _slipAnglePeak), -1.0f, 1.0f);
         }
 
         /// <summary>

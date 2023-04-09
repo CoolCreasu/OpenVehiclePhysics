@@ -7,7 +7,6 @@ namespace OVP.VehicleSystems
     {
         private float _clutchAngularVelocity = 0.0f;
         private float _engineAngularVelocity = 0.0f;
-        private float _clutchAngularAcceleration = 0.0f;
         private float _gearboxRatio = 0.0f;
         private float _clutchSlip = 0.0f;
         private float _clutchLock = 0.0f;

@@ -2,7 +2,8 @@
     "name": "OVP.VehicleSystems",
     "rootNamespace": "",
     "references": [
-        "GUID:b76bfefba23797847a6ef6d8490afcc7"
+        "GUID:b76bfefba23797847a6ef6d8490afcc7",
+        "GUID:f3357955715a7fe42afdc35c1b213730"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -110,6 +110,10 @@ GameObject:
   - component: {fileID: 1229731582456132352}
   - component: {fileID: 5209972582817286027}
   - component: {fileID: 6943226447975364980}
+  - component: {fileID: 4892520244469390414}
+  - component: {fileID: 285667153879347436}
+  - component: {fileID: 2322665946051649338}
+  - component: {fileID: 155996287418207157}
   m_Layer: 0
   m_Name: Car
   m_TagString: Untagged
@@ -183,6 +187,123 @@ MonoBehaviour:
   _wheelColliderFR: {fileID: 908241172664206464}
   _wheelColliderRL: {fileID: 1422034037421842378}
   _wheelColliderRR: {fileID: 7101260562263526094}
+  _engine: {fileID: 4892520244469390414}
+  _clutch: {fileID: 285667153879347436}
+  _gearbox: {fileID: 2322665946051649338}
+  _differential: {fileID: 155996287418207157}
+  _wheelBase: 2.47
+  _trackWidth: 1.36
+  _maxSteeringAngle: 40
+--- !u!114 &4892520244469390414
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 735385255327120641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 448badee4d3ea8a488dd940bb8d9130d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _startFriction: 50
+  _frictionCoefficient: 0.02
+  _engineInertia: 0.2
+  _engineIdleRPM: 1000
+  _engineMaxRPM: 7500
+  _torqueCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1200
+      value: 250
+      inSlope: 0.4
+      outSlope: 0.1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 4500
+      value: 400
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 9000
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &285667153879347436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 735385255327120641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 918e8f64f66c216418e62752e409920d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _clutchStiffness: 30
+  _clutchCapacity: 1.3
+  _engineMaxTorque: 400
+  _clutchDamping: 0.7
+--- !u!114 &2322665946051649338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 735385255327120641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19cf955c4bf653a489b94750abc8d4ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _shiftTime: 0.25
+  _gearRatios:
+  - -3.73
+  - 0
+  - 3.8
+  - 2.35
+  - 1.52
+  - 1.16
+  - 0.9
+  - 0.71
+--- !u!114 &155996287418207157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 735385255327120641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47cbd5d352337574ebcce1e840738d5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_DifferentialGearRatio: 3.9
 --- !u!1 &1018972491601896504
 GameObject:
   m_ObjectHideFlags: 0
