@@ -1,0 +1,16 @@
+{
+    "name": "OVP.VehicleSystems",
+    "rootNamespace": "",
+    "references": [
+        "GUID:b76bfefba23797847a6ef6d8490afcc7"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

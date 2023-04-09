@@ -1,0 +1,8 @@
+To export models as FBX from Blender:
+Apply Scalings = FBX Units Scale
+Forward = -Z Forward
+Up = Y Up
+
+Apply Unit on
+Use Space Transform on
+Apply Transform on
