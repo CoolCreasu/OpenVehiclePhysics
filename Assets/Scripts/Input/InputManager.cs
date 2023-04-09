@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -29,14 +30,16 @@ namespace OVP.Input
         private float _inputBrake = 0.0f;
         private float _inputSteering = 0.0f;
 
-        // TODO : Make these inputs work
-        private bool _inputGearUpPressed = false;
-        private bool _inputGearDownPressed = false;
-
+        // Properties to access the input values from other scripts
         public float InputThrottle { get => _inputThrottle; }
         public float InputBrake { get => _inputBrake; }
         public float InputSteering { get => _inputSteering; }
 
+        // Events that can be subscribed to by other scripts
+        public event Action InputGearUp = delegate { };
+        public event Action InputGearDown = delegate { };
+
+        // Callback methods for input actions
         private void OnThrottle(InputValue value)
         {
             _inputThrottle = value.Get<float>();
@@ -52,6 +55,14 @@ namespace OVP.Input
             _inputSteering = value.Get<float>();
         }
 
-        // TODO : Implement methods for gear shifting
+        private void OnGearUp()
+        {
+            InputGearUp.Invoke();
+        }
+
+        private void OnGearDown()
+        {
+            InputGearDown.Invoke();
+        }
     }
 }
