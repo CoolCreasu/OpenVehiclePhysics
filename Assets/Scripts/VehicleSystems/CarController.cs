@@ -102,8 +102,8 @@ namespace OVP.VehicleSystems
         {
             if (controlNow)
             {
-                _input.AccelerationInput = Input.GetAxis("Vertical");
-                _input.SteerInput = Input.GetAxis("Horizontal");
+                _input.AccelerationInput = UnityEngine.Input.GetAxis("Vertical");
+                _input.SteerInput = UnityEngine.Input.GetAxis("Horizontal");
             }
             else
             {
