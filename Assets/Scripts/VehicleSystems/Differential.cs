@@ -27,5 +27,14 @@ namespace OVP.VehicleSystems
             // multiplied by half the differential gear ratio to account for distribution of torque
             return outputShaftVelocityLeft + outputShaftVelocityRight * 0.5f * m_DifferentialGearRatio;
         }
+
+        public void GetOutputTorque(float inputTorque, float angularVelocityLeft, float angularVelocityRight, float inertia, float deltaTime, out float outputTorqueLeft, out float outputTorqueRight)
+        {
+            float symOpenDiff = inputTorque * m_DifferentialGearRatio * 0.5f;
+            float lockTorque = (angularVelocityLeft - angularVelocityRight) * 0.5f / deltaTime * inertia;
+
+            outputTorqueLeft = symOpenDiff - lockTorque;
+            outputTorqueRight = symOpenDiff + lockTorque;
+        }
     }
 }

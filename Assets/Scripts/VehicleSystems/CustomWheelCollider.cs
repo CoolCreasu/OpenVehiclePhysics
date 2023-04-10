@@ -19,7 +19,6 @@ namespace OVP.VehicleSystems
         [SerializeField] private float _wheelMass = 20.0f; // Mass of the wheel
         [SerializeField] private float _wheelRadius = 0.5f; // Radius of the wheel
 
-        private float _wheelInertia = 0.0f; // Inertia of the wheel
         private float _wheelRotation = 0.0f; // Current rotation of the wheel
         private Vector3 _localVelocity = Vector3.zero; // The local velocity of the wheel
         private Vector3 _wheelPosition = Vector3.zero; // Current position of the wheel
@@ -46,6 +45,7 @@ namespace OVP.VehicleSystems
         public float DriveTorque { get; set; } = 0.0f; // Drive torque applied to the wheel
         public float BrakeTorque { get; set; } = 0.0f; // Brake torque applied to the wheel
         public float WheelAngularVelocity { get; private set; } = 0.0f; // Angular velocity of the wheel
+        public float WheelInertia { get; private set; } = 2.5f; // Inertia of the wheel
 
         private void Awake()
         {
@@ -58,7 +58,7 @@ namespace OVP.VehicleSystems
 
         private void Start()
         {
-            _wheelInertia = _wheelRadius * _wheelRadius * _wheelMass * 0.5f;
+            WheelInertia = _wheelRadius * _wheelRadius * _wheelMass * 0.5f;
         }
 
         /// <summary>
@@ -171,11 +171,11 @@ namespace OVP.VehicleSystems
         private void CalculateWheelAcceleration()
         {
             // Calculate wheel angular velocity based on drive torque, force on the wheel due to suspension compression, wheel radius, inertia, and delta time
-            WheelAngularVelocity = WheelAngularVelocity + ((DriveTorque - _forceZ * _wheelRadius) / _wheelInertia * _deltaTime);
+            WheelAngularVelocity = WheelAngularVelocity + ((DriveTorque - _forceZ * _wheelRadius) / WheelInertia * _deltaTime);
 
             // Calculate brake torque effect on wheel angular velocity
             float sign = Mathf.Sign(WheelAngularVelocity);
-            WheelAngularVelocity = WheelAngularVelocity - (sign * BrakeTorque) / _wheelInertia * _deltaTime;
+            WheelAngularVelocity = WheelAngularVelocity - (sign * BrakeTorque) / WheelInertia * _deltaTime;
 
             // Zero cross detection braking
             if (Mathf.Sign(WheelAngularVelocity) != sign) 
@@ -203,7 +203,7 @@ namespace OVP.VehicleSystems
             // Calculate target angular acceleration based on the difference between current and target angular velocities, and inverse of delta time
             float targetAngularAcceleration = (WheelAngularVelocity - targetAngularVelocity) * _deltaTimeInverted;
             // Calculate target torque based on target angular acceleration and wheel inertia
-            float targetTorque = targetAngularAcceleration * _wheelInertia;
+            float targetTorque = targetAngularAcceleration * WheelInertia;
             // Calculate maximum friction torque based on suspension forces, wheel radius, and friction constant of the surface
             float maxFrictionTorque = (_suspensionForceSpring + _suspensionForceDamper) * _wheelRadius * 1.0f; // 1.0f is the friction constant of the surface Mu
             // Calculate slipZMax, which is the maximum longitudinal slip, clamped between -100.0f and 100.0f

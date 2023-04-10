@@ -83,8 +83,12 @@ namespace OVP.VehicleSystems
             // Torque stream
             _engine.UpdatePhysics(deltaTime, InputManager.Instance.InputThrottle, _clutch.ClutchTorque);
             float value = _gearbox.GetOutputTorque(_clutch.ClutchTorque);
-            _wheelColliderRL.DriveTorque = _differential.GetOutputTorqueLeft(value);
-            _wheelColliderRR.DriveTorque = _differential.GetOutputTorqueRight(value);
+            //_wheelColliderRL.DriveTorque = _differential.GetOutputTorqueLeft(value);
+            //_wheelColliderRR.DriveTorque = _differential.GetOutputTorqueRight(value);
+            _differential.GetOutputTorque(value, _wheelColliderRL.WheelAngularVelocity, _wheelColliderRR.WheelAngularVelocity, _wheelColliderRL.WheelInertia, deltaTime, out float leftTorque, out float rightTorque);
+
+            _wheelColliderRL.DriveTorque = leftTorque;
+            _wheelColliderRR.DriveTorque = rightTorque;
 
             // Update physics for each wheel collider
             _wheelColliderFL.UpdatePhysics(deltaTime);
