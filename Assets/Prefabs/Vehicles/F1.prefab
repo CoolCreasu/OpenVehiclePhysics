@@ -142,7 +142,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42eda0811ee84144496a4c46ea13376d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _suspensionLength: 0.2
+  _suspensionTravel: 0.15
   _suspensionSpring: 35000
   _suspensionDamper: 4500
   _wheelMass: 20
@@ -817,7 +817,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42eda0811ee84144496a4c46ea13376d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _suspensionLength: 0.2
+  _suspensionTravel: 0.15
   _suspensionSpring: 35000
   _suspensionDamper: 4500
   _wheelMass: 20
@@ -866,7 +866,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42eda0811ee84144496a4c46ea13376d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _suspensionLength: 0.2
+  _suspensionTravel: 0.15
   _suspensionSpring: 35000
   _suspensionDamper: 4500
   _wheelMass: 20
@@ -915,7 +915,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42eda0811ee84144496a4c46ea13376d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _suspensionLength: 0.2
+  _suspensionTravel: 0.15
   _suspensionSpring: 35000
   _suspensionDamper: 4500
   _wheelMass: 20

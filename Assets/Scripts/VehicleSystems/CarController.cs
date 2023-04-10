@@ -75,8 +75,11 @@ namespace OVP.VehicleSystems
             _wheelColliderRL.BrakeTorque = 8000 * InputManager.Instance.InputBrake;
             _wheelColliderRR.BrakeTorque = 8000 * InputManager.Instance.InputBrake;
 
-            _wheelColliderFL.transform.localRotation = Quaternion.Euler(0.0f, _steeringvalue * (_wheelBase / (_wheelBase + _trackWidth *  Mathf.Sign(_steeringvalue) * 0.5f)), 0.0f);
-            _wheelColliderFR.transform.localRotation = Quaternion.Euler(0.0f, _steeringvalue * (_wheelBase / (_wheelBase + _trackWidth * -Mathf.Sign(_steeringvalue) * 0.5f)), 0.0f);
+            //_wheelColliderFL.transform.localRotation = Quaternion.Euler(0.0f, _steeringvalue * (_wheelBase / (_wheelBase + _trackWidth *  Mathf.Sign(_steeringvalue) * 0.5f)), 0.0f);
+            //_wheelColliderFR.transform.localRotation = Quaternion.Euler(0.0f, _steeringvalue * (_wheelBase / (_wheelBase + _trackWidth * -Mathf.Sign(_steeringvalue) * 0.5f)), 0.0f);
+
+            _wheelColliderFL.SteerAngle = _steeringvalue * (_wheelBase / (_wheelBase + _trackWidth *  Mathf.Sign(_steeringvalue) * 0.5f));
+            _wheelColliderFR.SteerAngle = _steeringvalue * (_wheelBase / (_wheelBase + _trackWidth * -Mathf.Sign(_steeringvalue) * 0.5f));
 
             float deltaTime = Time.fixedDeltaTime; // Get the time since last fixed update
 

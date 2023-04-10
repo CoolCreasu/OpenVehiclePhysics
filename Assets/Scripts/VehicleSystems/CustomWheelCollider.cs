@@ -11,7 +11,7 @@ namespace OVP.VehicleSystems
         private Rigidbody _rigidbody = default; // Reference to the Rigidbody attached to the same GameObject
 
         [Header("Suspension")]
-        [SerializeField] private float _suspensionLength = 0.3f; // Length of the suspension
+        [SerializeField] private float _suspensionTravel = 0.3f; // Length of the suspension
         [SerializeField] private float _suspensionSpring = 35000.0f; // Spring force of the suspension
         [SerializeField] private float _suspensionDamper = 4500.0f; // Damping force of the suspension
 
@@ -25,6 +25,11 @@ namespace OVP.VehicleSystems
         private bool _isGrounded = false; // Whether the wheel is grounded or not
         private bool _isLocked = false; // Whether the wheel is locked or not
 
+        private Vector3 _dirForward = Vector3.zero; //Real forward wheel direction
+        private Vector3 _dirUp = Vector3.zero; //Real up wheel direction
+        private Vector3 _dirRight = Vector3.zero; //Real right wheel direction
+        private Quaternion _localRotation = Quaternion.identity; // Real local rotation of the wheel
+
         private float _slipZ = 0.0f; // Slip value in the Z-axis (direction of travel)
         private float _slipX = 0.0f; // Slip value in the X-axis (direction perpendicular to travel)
         private float _forceZ = 0.0f; // Force applied in the Z-axis (direction of travel)
@@ -33,7 +38,10 @@ namespace OVP.VehicleSystems
         private float _slipAngleDynamic = 0.0f; // Dynamic slip angle of the wheel
         private float _longitudinalSlipVelocity = 0.0f; // Longitudinal slip velocity of the wheel
 
+        private float _steerAngle = 0.0f; // current steer angle in degrees
+
         private RaycastHit _raycastHit = default; // RaycastHit used for detecting ground
+        private float _suspensionLength = 0.0f; //Current length of the suspension 
         private float _suspensionCompression = 0.0f; // Current compression of the suspension
         private float _suspensionCompressionPrevious = 0.0f; // Previous compression of the suspension
         private float _suspensionForceSpring = 0.0f; // Spring force applied by the suspension
@@ -44,6 +52,7 @@ namespace OVP.VehicleSystems
 
         public float DriveTorque { get; set; } = 0.0f; // Drive torque applied to the wheel
         public float BrakeTorque { get; set; } = 0.0f; // Brake torque applied to the wheel
+        public float SteerAngle { get => _steerAngle; set => _steerAngle = value; }
         public float WheelAngularVelocity { get; private set; } = 0.0f; // Angular velocity of the wheel
         public float WheelInertia { get; private set; } = 2.5f; // Inertia of the wheel
 
@@ -68,8 +77,8 @@ namespace OVP.VehicleSystems
         /// <param name="rotation">The rotation of the wheel.</param>
         public void GetWorldPose(out Vector3 position, out Quaternion rotation)
         {
-            position = _wheelPosition; // Set the position of the wheel
-            rotation = Quaternion.Euler(_wheelRotation, transform.eulerAngles.y, 0.0f); // Set the rotation of the wheel
+            position = transform.position - transform.up * _suspensionLength; // Set the position of the wheel
+            rotation = transform.rotation * Quaternion.Euler(_wheelRotation, _steerAngle, 0.0f); // Set the rotation of the wheel
         }
 
         /// <summary>
@@ -84,13 +93,14 @@ namespace OVP.VehicleSystems
             _deltaTimeInverted = 1.0f / deltaTime; // Calculate inverted delta time for physics update
 
             CheckIfGrounded();
+            CalculateDirections();
+            CalculateLocalVelocity();
 
             CalculateSuspensionCompression();
             CalculateSuspensionForces();
             ApplySuspensionForces();
 
             CalculateWheelPosition();
-            CalculateLocalVelocity();
             CalculateWheelAcceleration();
 
             CalculateSlipZ();
@@ -104,7 +114,7 @@ namespace OVP.VehicleSystems
         /// </summary>
         private void CheckIfGrounded()
         {
-            _isGrounded = Physics.Raycast(transform.position, -transform.up, out _raycastHit, _suspensionLength + _wheelRadius);
+            _isGrounded = Physics.Raycast(transform.position, -transform.up, out _raycastHit, _suspensionTravel + _wheelRadius);
 
             // If the wheel is not grounded, set the raycast hit normal to be equal to the wheel's up direction.
             if (!_isGrounded)
@@ -114,14 +124,37 @@ namespace OVP.VehicleSystems
         }
 
         /// <summary>
+        /// Calculates the directions and rotations.
+        /// </summary>
+        private void CalculateDirections()
+        {
+            // Calculate a local rotation based on the current steering angle.
+            // TODO: evaluate optional camber and caster here for wheels
+            _localRotation = Quaternion.Euler(0, _steerAngle, -5);
+            // Transform the right, forward, and up direction vectors based on the local rotation.
+            _dirForward = transform.TransformDirection(_localRotation * Vector3.forward);
+            _dirUp = transform.TransformDirection(_localRotation * Vector3.up);
+            _dirRight = transform.TransformDirection(_localRotation * Vector3.right);
+        }
+
+        /// <summary>
         /// Calculates the suspension compression based on whether the wheel is grounded or not.
         /// </summary>
         private void CalculateSuspensionCompression()
         {
-            // If the wheel is grounded, calculate the suspension compression based on the distance between the wheel and the raycast hit point.
-            // Otherwise, set the suspension compression to 0.
+            // Get the distance between the wheel and the road surface from a raycast.
+            float distanceToRoad = _raycastHit.distance;
             _suspensionCompressionPrevious = _isGrounded ? _suspensionCompression : 0.0f;
-            _suspensionCompression = _isGrounded ? (_suspensionLength + _wheelRadius) - _raycastHit.distance : 0.0f;
+            // Calculate the target suspension length
+            float targetSuspensionLength = distanceToRoad - _wheelRadius;
+            _suspensionLength = _isGrounded ? targetSuspensionLength : _suspensionTravel;
+
+            // Ensure that the suspension travel is not less than the fixed delta time. Mostly to get rid of bugs(NAN).
+            if (_suspensionTravel < _deltaTime) _suspensionTravel = _deltaTime;
+            // Calculate the new suspension compression based on the suspension travel and suspension length,
+            // and clamp it to within the suspension travel limits.
+            _suspensionCompression = (_suspensionTravel - _suspensionLength);
+            _suspensionCompression = Mathf.Clamp(_suspensionCompression, 0.0f, _suspensionTravel);
         }
 
         /// <summary>
@@ -151,7 +184,7 @@ namespace OVP.VehicleSystems
         {
             // Calculate the wheel position by subtracting the product of suspension length and suspension compression from the transform position in the up direction.
             // This accounts for the compression of the suspension, resulting in the wheel being positioned above the ground when the suspension is compressed.
-            _wheelPosition = transform.position - transform.up * (_suspensionLength - _suspensionCompression);
+            _wheelPosition = transform.position - transform.up * _suspensionLength;
         }
 
         /// <summary>
@@ -163,6 +196,11 @@ namespace OVP.VehicleSystems
             // If the raycast hit has a rigidbody, subtract the velocity of the rigidbody at the wheel position, otherwise subtract zero vector.
             // Finally, transform the resulting velocity to local space using InverseTransformDirection.
             _localVelocity = transform.InverseTransformDirection(_rigidbody.GetPointVelocity(_wheelPosition) - (_raycastHit.rigidbody ? _raycastHit.rigidbody.GetPointVelocity(_wheelPosition) : Vector3.zero));
+            Vector3 _worldVelocity = _rigidbody.GetPointVelocity(_wheelPosition) - (_raycastHit.rigidbody ? _raycastHit.rigidbody.GetPointVelocity(_raycastHit.point) : Vector3.zero);
+
+            _localVelocity.x = Vector3.Dot(_worldVelocity, _dirRight);
+            _localVelocity.y = Vector3.Dot(_worldVelocity, _dirUp);
+            _localVelocity.z = Vector3.Dot(_worldVelocity, _dirForward);
         }
 
         /// <summary>
@@ -219,10 +257,29 @@ namespace OVP.VehicleSystems
         /// </summary>
         private void CalculateSlipX()
         {
+            /*
             // Calculate slip angle based on local velocity along the X-axis and absolute value of local velocity along the Z-axis
+            if (_localVelocity.z != 0.0f) // Check if forward speed is not zero
+            {
+                // Atan(-x / +z)
+                _slipAngle = Mathf.Atan((-_localVelocity.x) / Mathf.Abs(_localVelocity.z)) * Mathf.Rad2Deg;
+            }
+            else
+            {
+                _slipAngle = 0.0f; // If local velocity is zero = no slip angle
+            }
+            */
+
+            // Calculate slip angle based on local velocity along the X-axis and absolute value of local velocity along the Z-axis
+            // Atan2 (NAN free method) Atan2(-X / +Z) 
             _slipAngle = Mathf.Atan2(-_localVelocity.x, Mathf.Abs(_localVelocity.z)) * Mathf.Rad2Deg;
+            
             // Calculate delta, which is a normalized value of local velocity magnitude relative to a range of 3.0f to 6.0f
-            float delta = (_localVelocity.magnitude - 3.0f) / (6.0f - 3.0f);
+            //float delta = (_localVelocity.magnitude - 3.0f) / (6.0f - 3.0f);
+
+            // Calculate delta, which is a normalized value of local velocity magnitude relative to a range of 3.0f to 6.0f
+            //float delta =  (_localVelocity.magnitude - 3.0f) / (6.0f - 3.0f); 
+            float delta = Mathf.InverseLerp(3.0f, 6.0f, _localVelocity.magnitude);
             // Calculate slip angle based on slip angle peak, sign of local velocity along the X-axis, and delta
             float slipAngle = Mathf.Lerp(_slipAnglePeak * Mathf.Sign(-_localVelocity.x), _slipAngle, delta);
             // Update slip angle dynamic based on slip angle, local velocity along the X-axis, delta time, and a time-based interpolation factor
@@ -241,8 +298,9 @@ namespace OVP.VehicleSystems
             // Calculate the combined tire slip as a Vector2, clamped to a magnitude of 1.0f, based on slipX and slipZ
             Vector2 combinedTireSlip = Vector2.ClampMagnitude(new Vector2(_slipX, _slipZ), 1.0f);
             // Calculate the forward and right directions of the wheel, projected onto the plane defined by the ground contact normal, and normalized
-            Vector3 forward = Vector3.ProjectOnPlane(transform.forward, _raycastHit.normal).normalized;
-            Vector3 right = Vector3.ProjectOnPlane(transform.right, _raycastHit.normal).normalized;
+            Vector3 forward = Vector3.ProjectOnPlane(_dirForward, _raycastHit.normal).normalized;
+            Vector3 right = Vector3.ProjectOnPlane(_dirRight, _raycastHit.normal).normalized;
+
             // Calculate the force along the Z-axis (forward direction) based on combined tire slip and the effective load on the tire
             _forceZ = combinedTireSlip.y * load;
             // Calculate the force along the forward and right directions based on combined tire slip, effective load on the tire, and corresponding directions
