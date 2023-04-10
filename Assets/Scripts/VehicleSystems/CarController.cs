@@ -1,4 +1,3 @@
-using OVP.Input;
 using UnityEngine;
 
 namespace OVP.VehicleSystems
@@ -6,107 +5,158 @@ namespace OVP.VehicleSystems
     /// <summary>
     /// Car controller that updates physics for the wheels of a vehicle.
     /// </summary>
-    public class CarController : MonoBehaviour
+    /// 
+    public class VehicleInput
     {
-        [SerializeField] private CustomWheelCollider _wheelColliderFL = default; // Front left wheel collider
-        [SerializeField] private CustomWheelCollider _wheelColliderFR = default; // Front right wheel collider
-        [SerializeField] private CustomWheelCollider _wheelColliderRL = default; // Rear left wheel collider
-        [SerializeField] private CustomWheelCollider _wheelColliderRR = default; // Rear right wheel collider
-
-        [SerializeField] private Engine _engine = default;
-        [SerializeField] private Clutch _clutch = default;
-        [SerializeField] private Gearbox _gearbox = default;
-        [SerializeField] private Differential _differential = default;
-
-        [SerializeField] private float _wheelBase = 3.12f;
-        [SerializeField] private float _trackWidth = 1.5f;
-        [SerializeField] private float _maxSteeringAngle = 40.0f;
-
-        private float _steeringvalue = 0.0f;
-
-        private void Awake()
+        private float _steerInput;
+        private float _accelerationInput;
+        public float SteerInput
         {
-            if (!_engine) Debug.LogWarning("CarController requires an attached Engine to function.");
-            if (!_clutch) Debug.LogWarning("CarController requires an attached Clutch to function.");
-            if (!_gearbox) Debug.LogWarning("CarController requires an attached Gearbox to function.");
-            if (!_differential) Debug.LogWarning("CarController requires an attached Differential to function.");
+            get => _steerInput;
+            set => _steerInput = Mathf.Clamp(value,-1f,1f);
         }
 
-        private void OnEnable()
+        public float AccelerationInput
         {
-            // In Unity game engine, the Awake() and OnEnable() methods are called immediately one after the other, per object, not per method.
-            // This means that when the scripts are initialized, both Awake() and OnEnable() methods are invoked in sequence for each object.
-            // In this case, if there is an instance of InputManager available, the InputGearUp and InputGearDown events are subscribed to using the corresponding event handlers, OnGearUp() and OnGearDown().
-            // This is the reason we have a null check here.
-            if (InputManager.Instance)
+            get => _accelerationInput;
+            set => _accelerationInput = Mathf.Clamp(value, -1f, 1f);
+        }
+
+        public void Reset()
+        {
+            _steerInput = 0;
+            _accelerationInput = 0;
+        }
+    }
+
+    public class CarController : MonoBehaviour
+    {
+        [SerializeField] private bool controlNow = false;
+        [SerializeField] private CustomWheelCollider wheelColliderFL = default; // Front left wheel collider
+        [SerializeField] private CustomWheelCollider wheelColliderFR = default; // Front right wheel collider
+        [SerializeField] private CustomWheelCollider wheelColliderRL = default; // Rear left wheel collider
+        [SerializeField] private CustomWheelCollider wheelColliderRR = default; // Rear right wheel collider
+
+        [SerializeField] private float maxSteeringAngle = 45f; //Max Steering angle in Degrees
+        [SerializeField] private float maxSpeed = 50; // Max speed in M/S
+        [SerializeField] private float reverseMaxSpeed = 20; // Max speed in M/S
+        [SerializeField] private AnimationCurve torqueSpeedCurve = new AnimationCurve(new Keyframe(0, 1), new Keyframe(1, 0)); //torque curve by speed
+        [SerializeField] private AnimationCurve reverseTorqueCurve = new AnimationCurve(new Keyframe(0, 1), new Keyframe(1, 0)); //reverse curve by speed
+        [SerializeField] private float engineTorque = 1000f; //Engine torque
+        [SerializeField] private float brakeTorque = 4000f; //Brake torque
+
+        private Vector3 _worldVelocity; //World velocity
+        private Vector3 _localVelocity; //Local velocity
+
+        private Rigidbody _vehicleRigidbody; //rigidbody of vehicle
+
+        private VehicleInput _input; //input class
+
+        private bool _isReverse; //Is it reverse?
+
+        /// <summary>
+        /// Start function of the vehicle
+        /// </summary>
+        private void Start()
+        {
+            _input = new VehicleInput();
+
+            _vehicleRigidbody = gameObject.GetComponent<Rigidbody>();
+            if(_vehicleRigidbody == null)
             {
-                InputManager.Instance.InputGearUp += OnGearUp;
-                InputManager.Instance.InputGearDown += OnGearDown;
+                Debug.LogError(gameObject.name + "doesn`t contain rigidbody component");
             }
         }
 
-        private void Start()
-        {
-            InputManager.Instance.InputGearUp += OnGearUp;
-            InputManager.Instance.InputGearDown += OnGearDown;
-        }
-
-        private void OnDisable()
-        {
-            InputManager.Instance.InputGearUp -= OnGearUp;
-            InputManager.Instance.InputGearDown -= OnGearDown;
-        }
-
-        private void Update()
-        {
-            _steeringvalue = Mathf.MoveTowards(_steeringvalue, InputManager.Instance.InputSteering * _maxSteeringAngle, Time.deltaTime * 200.0f);
-        }
 
         /// <summary>
-        /// Fixed update method that updates physics for the wheels of the vehicle.
+        /// Fixed update method that updates physics of the vehicle.
         /// </summary>
         private void FixedUpdate()
         {
-            if (!_engine || !_clutch || !_gearbox || !_differential) return;
-
-            // BrakeTorque
-            _wheelColliderFL.BrakeTorque = 8000 * InputManager.Instance.InputBrake;
-            _wheelColliderFR.BrakeTorque = 8000 * InputManager.Instance.InputBrake;
-            _wheelColliderRL.BrakeTorque = 8000 * InputManager.Instance.InputBrake;
-            _wheelColliderRR.BrakeTorque = 8000 * InputManager.Instance.InputBrake;
-
-            _wheelColliderFL.transform.localRotation = Quaternion.Euler(0.0f, _steeringvalue * (_wheelBase / (_wheelBase + _trackWidth *  Mathf.Sign(_steeringvalue) * 0.5f)), 0.0f);
-            _wheelColliderFR.transform.localRotation = Quaternion.Euler(0.0f, _steeringvalue * (_wheelBase / (_wheelBase + _trackWidth * -Mathf.Sign(_steeringvalue) * 0.5f)), 0.0f);
-
-            float deltaTime = Time.fixedDeltaTime; // Get the time since last fixed update
-
-            // Torque stream
-            _engine.UpdatePhysics(deltaTime, InputManager.Instance.InputThrottle, _clutch.ClutchTorque);
-            float value = _gearbox.GetOutputTorque(_clutch.ClutchTorque);
-            _wheelColliderRL.DriveTorque = _differential.GetOutputTorqueLeft(value);
-            _wheelColliderRR.DriveTorque = _differential.GetOutputTorqueRight(value);
+            float fixedDeltaTime = Time.fixedDeltaTime; // Get the time since last fixed update
+            HandleInput();
+            CalculateVelocities();
+            RunVehicleLogic();
 
             // Update physics for each wheel collider
-            _wheelColliderFL.UpdatePhysics(deltaTime);
-            _wheelColliderFR.UpdatePhysics(deltaTime);
-            _wheelColliderRL.UpdatePhysics(deltaTime);
-            _wheelColliderRR.UpdatePhysics(deltaTime);
-
-            // Velocity stream
-            value = _differential.GetInputShaftVelocity(_wheelColliderRL.WheelAngularVelocity, _wheelColliderRR.WheelAngularVelocity);
-            value = _gearbox.GetInputShaftVelocity(value);
-            _clutch.UpdatePhysics(value, _engine.EngineAngularVelocity, _gearbox.GetGear());
-            _engine.UpdatePhysics(deltaTime, InputManager.Instance.InputThrottle, _clutch.ClutchTorque);
+            wheelColliderFL.UpdatePhysics(fixedDeltaTime);
+            wheelColliderFR.UpdatePhysics(fixedDeltaTime);
+            wheelColliderRL.UpdatePhysics(fixedDeltaTime);
+            wheelColliderRR.UpdatePhysics(fixedDeltaTime);
         }
-
-        private void OnGearUp()
+        /// <summary>
+        /// Calculates the velocities
+        /// </summary>
+        private void CalculateVelocities()
         {
-            _gearbox.ShiftGearUp();
+            //Getting world and local velocity
+            _worldVelocity = _vehicleRigidbody.velocity;
+            _localVelocity = transform.InverseTransformDirection(_worldVelocity);
+
+        }
+        /// <summary>
+        /// Handle the input
+        /// </summary>
+        private void HandleInput() //Getting input for the vehicle
+        {
+            if (controlNow)
+            {
+                _input.AccelerationInput = Input.GetAxis("Vertical");
+                _input.SteerInput = Input.GetAxis("Horizontal");
+            }
+            else
+            {
+                _input.Reset();
+            }
         }
 
-        private void OnGearDown()
+        /// <summary>
+        /// Handle the motor, brakes, steering
+        /// </summary>
+        private void RunVehicleLogic()
         {
-            _gearbox.ShiftGearDown();
+            //Check for reverse input
+            _isReverse = (_input.AccelerationInput < 0) ? true : false;
+
+            //Get Forward velocity
+            float forwardVelocity = _localVelocity.z;
+
+            //Calculate the percentage of maximum speed
+            float velocityPercentage = Mathf.Clamp01(forwardVelocity / ((_isReverse) ? -Mathf.Abs(reverseMaxSpeed) : maxSpeed));
+            //Evaluate the torque curve based on velocity percentage
+            //The torque curve determines the amount of torque to apply to the wheels based on the current velocity percentage
+            float motorMultiplier = (!_isReverse) ? torqueSpeedCurve.Evaluate(velocityPercentage) : reverseTorqueCurve.Evaluate(velocityPercentage);
+
+            //FIX ME: Add some maybe array class for each wheel which can contains condition like Steering, IsMotor, CanBrake etc.
+            //Or just add engine, transmission and so on
+            wheelColliderFL.DriveTorque = engineTorque * motorMultiplier * _input.AccelerationInput;
+            wheelColliderFR.DriveTorque = engineTorque * motorMultiplier * _input.AccelerationInput;
+            wheelColliderRL.DriveTorque = engineTorque * motorMultiplier * _input.AccelerationInput;
+            wheelColliderRR.DriveTorque = engineTorque * motorMultiplier * _input.AccelerationInput;
+
+            bool braking = false;
+            //The first section of code determines whether the vehicle is braking or not.
+            //If the vehicle is accelerating in the opposite direction of its current velocity,
+            //then the variable "braking" is set to true. Otherwise, it is set to false.
+            if ((_input.AccelerationInput < 0 && forwardVelocity > 0) || (_input.AccelerationInput > 0 && forwardVelocity < 0)) braking = true;
+
+            if (braking)
+            {
+                wheelColliderFR.BrakeTorque = wheelColliderFL.BrakeTorque = wheelColliderRL.BrakeTorque = wheelColliderRR.BrakeTorque = brakeTorque * Mathf.Abs(_input.AccelerationInput);
+            }
+            else
+            {
+                wheelColliderFR.BrakeTorque = wheelColliderFL.BrakeTorque = wheelColliderRL.BrakeTorque = wheelColliderRR.BrakeTorque = 0;
+            }
+
+            //e sets the steering angle of the front wheels based on the player's steering input.
+            //The steering input is multiplied by the maximum steering angle
+            //to determine the actual steering angle of the front wheels.
+            wheelColliderFL.SteerAngle = _input.SteerInput * maxSteeringAngle;
+            wheelColliderFR.SteerAngle = _input.SteerInput * maxSteeringAngle;
+
         }
+
     }
 }

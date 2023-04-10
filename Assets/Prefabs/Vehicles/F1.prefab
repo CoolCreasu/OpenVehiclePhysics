@@ -142,11 +142,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42eda0811ee84144496a4c46ea13376d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _suspensionLength: 0.2
-  _suspensionSpring: 35000
-  _suspensionDamper: 4500
-  _wheelMass: 20
-  _wheelRadius: 0.35
+  suspensionTravel: 0.15
+  suspensionSpring: 35000
+  suspensionDamper: 4500
+  wheelMass: 20
+  wheelRadius: 0.3
 --- !u!1 &630036507439380656
 GameObject:
   m_ObjectHideFlags: 0
@@ -817,11 +817,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42eda0811ee84144496a4c46ea13376d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _suspensionLength: 0.2
-  _suspensionSpring: 35000
-  _suspensionDamper: 4500
-  _wheelMass: 20
-  _wheelRadius: 0.35
+  suspensionTravel: 0.15
+  suspensionSpring: 35000
+  suspensionDamper: 4500
+  wheelMass: 20
+  wheelRadius: 0.3
 --- !u!1 &5043674498281399112
 GameObject:
   m_ObjectHideFlags: 0
@@ -866,11 +866,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42eda0811ee84144496a4c46ea13376d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _suspensionLength: 0.2
-  _suspensionSpring: 35000
-  _suspensionDamper: 4500
-  _wheelMass: 20
-  _wheelRadius: 0.35
+  suspensionTravel: 0.15
+  suspensionSpring: 35000
+  suspensionDamper: 4500
+  wheelMass: 20
+  wheelRadius: 0.3
 --- !u!1 &5560700057097271614
 GameObject:
   m_ObjectHideFlags: 0
@@ -915,11 +915,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42eda0811ee84144496a4c46ea13376d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _suspensionLength: 0.2
-  _suspensionSpring: 35000
-  _suspensionDamper: 4500
-  _wheelMass: 20
-  _wheelRadius: 0.35
+  suspensionTravel: 0.15
+  suspensionSpring: 35000
+  suspensionDamper: 4500
+  wheelMass: 20
+  wheelRadius: 0.3
 --- !u!1 &8165188034343752409
 GameObject:
   m_ObjectHideFlags: 0
@@ -1015,10 +1015,6 @@ GameObject:
   - component: {fileID: 4233751292235186692}
   - component: {fileID: 3798146723416564812}
   - component: {fileID: 4677596487652905773}
-  - component: {fileID: 3308995208605367260}
-  - component: {fileID: 4019060646300111314}
-  - component: {fileID: 6606211554019954778}
-  - component: {fileID: 4550880774114167044}
   m_Layer: 0
   m_Name: F1
   m_TagString: Untagged
@@ -1088,40 +1084,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99dc9176d6664c0418d34947c127acda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _wheelColliderFL: {fileID: 6668664498606386008}
-  _wheelColliderFR: {fileID: 3278888400345147854}
-  _wheelColliderRL: {fileID: 4208910982825511363}
-  _wheelColliderRR: {fileID: 2033904379810209233}
-  _engine: {fileID: 3308995208605367260}
-  _clutch: {fileID: 4019060646300111314}
-  _gearbox: {fileID: 6606211554019954778}
-  _differential: {fileID: 4550880774114167044}
-  _wheelBase: 3.12
-  _trackWidth: 1.5
-  _maxSteeringAngle: 40
---- !u!114 &3308995208605367260
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8238790932309412728}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 448badee4d3ea8a488dd940bb8d9130d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _startFriction: 50
-  _frictionCoefficient: 0.02
-  _engineInertia: 0.2
-  _engineIdleRPM: 1000
-  _engineMaxRPM: 7500
-  _torqueCurve:
+  controlNow: 0
+  wheelColliderFL: {fileID: 6668664498606386008}
+  wheelColliderFR: {fileID: 3278888400345147854}
+  wheelColliderRL: {fileID: 4208910982825511363}
+  wheelColliderRR: {fileID: 2033904379810209233}
+  maxSteeringAngle: 45
+  maxSpeed: 50
+  reverseMaxSpeed: 20
+  torqueSpeedCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1129,25 +1105,7 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 1200
-      value: 250
-      inSlope: 0.4
-      outSlope: 0.1
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 4500
-      value: 400
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 9000
+      time: 1
       value: 0
       inSlope: 0
       outSlope: 0
@@ -1158,57 +1116,32 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &4019060646300111314
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8238790932309412728}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 918e8f64f66c216418e62752e409920d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _clutchStiffness: 30
-  _clutchCapacity: 1.3
-  _engineMaxTorque: 400
-  _clutchDamping: 0.7
---- !u!114 &6606211554019954778
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8238790932309412728}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19cf955c4bf653a489b94750abc8d4ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _shiftTime: 0.25
-  _gearRatios:
-  - -3.73
-  - 0
-  - 3.8
-  - 2.35
-  - 1.52
-  - 1.16
-  - 0.9
-  - 0.71
---- !u!114 &4550880774114167044
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8238790932309412728}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47cbd5d352337574ebcce1e840738d5d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_DifferentialGearRatio: 3.9
+  reverseTorqueCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  engineTorque: 2000
+  brakeTorque: 4000
 --- !u!1 &9042159822502517823
 GameObject:
   m_ObjectHideFlags: 0
