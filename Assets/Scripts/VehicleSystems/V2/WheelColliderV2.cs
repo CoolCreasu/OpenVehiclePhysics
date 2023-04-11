@@ -9,17 +9,23 @@ namespace OVP.VehicleSystems
         [Header("Suspension")]
         [SerializeField] private float _suspensionLength = 0.3f;
         [SerializeField] private float _suspensionSpring = 35000.0f;
-        [SerializeField] private float _suspensionDamping = 4500.0f;
+        [SerializeField] private float _suspensionDamper = 4500.0f;
 
         [Header("Wheel")]
         [SerializeField] private float _wheelRadius = 0.5f;
 
         private Vector3 _position = Vector3.zero;
+        private Quaternion _rotation = Quaternion.identity;
         private Quaternion _localRotation = Quaternion.identity;
         private Vector3 _localForward = Vector3.zero;
         private Vector3 _localUp = Vector3.zero;
         private Vector3 _localRight = Vector3.zero;
 
+        private float _slipX = 0.0f;
+        private float _slipZ = 0.0f;
+
+        private float _wheelRotation = 0.0f;
+        private Vector3 _localVelocity = Vector3.zero;
         private Vector3 _wheelPosition = Vector3.zero;
         private bool _isGrounded = false;
 
@@ -27,8 +33,9 @@ namespace OVP.VehicleSystems
         private float _suspensionCompression = 0.0f;
         private float _suspensionCompressionPrevious = 0.0f;
 
-        public bool DebugMode { get; set; }
-        public float SteerAngle { get; set; }
+        public bool DebugMode { get; set; } = false;
+        public float SteerAngle { get; set; } = 0.0f;
+        public float AngularVelocity { get; private set; } = 0.0f;
 
         private void Awake()
         {
@@ -39,15 +46,20 @@ namespace OVP.VehicleSystems
             }
         }
 
-        public void GetWorldPose(out Vector3 position)
+        public void GetWorldPose(out Vector3 position, out Quaternion rotation)
         {
             position = _wheelPosition;
+            rotation = _rotation * Quaternion.Euler(_wheelRotation, SteerAngle, 0.0f);
+
         }
 
         public void UpdatePhysics(float deltaTime, float deltaTimeInverted)
         {
+            if (!_rigidbody) return;
+
             // ===== CACHING =====
             _position = transform.position;
+            _rotation = transform.rotation;
 
             // Calculate the local Forward, Up and Right directions
             _localRotation = Quaternion.Euler(0, SteerAngle, 0);
@@ -65,11 +77,43 @@ namespace OVP.VehicleSystems
 
             // ===== RAYCAST =====
             _isGrounded = Physics.Raycast(_position, -_localUp, out _raycastHit, _suspensionLength + _wheelRadius);
+            if (!_isGrounded) _raycastHit.normal = _localUp;
+
+            // ===== COMPRESSION =====
+            _suspensionCompressionPrevious = _isGrounded ? _suspensionCompression : 0.0f;
+            _suspensionCompression = _isGrounded ? (_suspensionLength + _wheelRadius) - _raycastHit.distance : 0.0f;
+
+            // ===== POSITION =====
+            _wheelPosition = _position - _localUp * (_suspensionLength - _suspensionCompression);
+
+            // ===== LOCAL VELOCITY =====
+            Vector3 worldVelocity = _rigidbody.GetPointVelocity(_wheelPosition) - (_raycastHit.rigidbody ? _raycastHit.rigidbody.GetPointVelocity(_wheelPosition) : Vector3.zero);
+            _localVelocity.x = Vector3.Dot(worldVelocity, _localRight);
+            _localVelocity.y = Vector3.Dot(worldVelocity, _localUp);
+            _localVelocity.z = Vector3.Dot(worldVelocity, _localForward);
 
             // ===== SUSPENSION =====
-
-            // Below is a way to get the compression of the suspension
             // compression = 1 - ((raycast distance - wheel radius) / max suspension length)
+            float suspensionForce = (_suspensionCompression * _suspensionSpring) + ((_suspensionCompression - _suspensionCompressionPrevious) * deltaTimeInverted * _suspensionDamper);
+            _rigidbody.AddForceAtPosition(_localUp * suspensionForce, _position);
+
+            // TODO Forces for wheel rotation
+
+            // ===== ROTATION =====
+            _wheelRotation = _wheelRotation + AngularVelocity * Mathf.Rad2Deg * deltaTime;
+            _wheelRotation = Mathf.Repeat(_wheelRotation, 360.0f); // Make it stay in 0-360
+
+            // TODO SLIP X and Z calculations
+
+            // ===== COMBINED SLIP =====
+            Vector2 combinedTireSlip = Vector2.ClampMagnitude(new Vector2(_slipX, _slipZ), 1.0f);
+
+            // ===== SURFACE =====
+            Vector3 forward = Vector3.ProjectOnPlane(_localForward, _raycastHit.normal).normalized;
+            Vector3 right = Vector3.ProjectOnPlane(_localRight, _raycastHit.normal).normalized;
+
+            // ===== TIRE FORCE =====
+            if (_isGrounded) _rigidbody.AddForceAtPosition(forward * combinedTireSlip.y * suspensionForce + right * combinedTireSlip.x * suspensionForce, _wheelPosition);
         }
     }
 }

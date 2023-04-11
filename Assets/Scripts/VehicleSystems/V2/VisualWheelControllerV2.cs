@@ -18,9 +18,10 @@ namespace OVP.VehicleSystems
         {
             if (!_wheelCollider) return;
 
-            _wheelCollider.GetWorldPose(out Vector3 position);
+            _wheelCollider.GetWorldPose(out Vector3 position, out Quaternion rotation);
 
             transform.position = position;
+            transform.rotation = rotation;
         }
     }
 }
