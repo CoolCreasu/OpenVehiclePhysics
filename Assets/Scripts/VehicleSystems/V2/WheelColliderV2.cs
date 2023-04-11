@@ -13,6 +13,7 @@ namespace OVP.VehicleSystems
 
         [Header("Wheel")]
         [SerializeField] private float _wheelRadius = 0.5f;
+        [SerializeField] private float _wheelMass = 20.0f;
 
         private Vector3 _position = Vector3.zero;
         private Quaternion _rotation = Quaternion.identity;
@@ -23,19 +24,24 @@ namespace OVP.VehicleSystems
 
         private float _slipX = 0.0f;
         private float _slipZ = 0.0f;
+        private float _slipFeedbackForce = 0.0f;
 
         private float _wheelRotation = 0.0f;
         private Vector3 _localVelocity = Vector3.zero;
         private Vector3 _wheelPosition = Vector3.zero;
         private bool _isGrounded = false;
+        private bool _isLocked = false;
 
         private RaycastHit _raycastHit = default;
         private float _suspensionCompression = 0.0f;
         private float _suspensionCompressionPrevious = 0.0f;
 
         public bool DebugMode { get; set; } = false;
+        public float DriveTorque { get; set; } = 0.0f;
+        public float BrakeTorque { get; set; } = 0.0f;
         public float SteerAngle { get; set; } = 0.0f;
         public float AngularVelocity { get; private set; } = 0.0f;
+        public float WheelInertia { get; private set; } = 2.5f;
 
         private void Awake()
         {
@@ -44,6 +50,11 @@ namespace OVP.VehicleSystems
             {
                 Debug.LogWarning("WheelColliderV2 requires an attached Rigidbody to function.");
             }
+        }
+
+        private void Start()
+        {
+            WheelInertia = _wheelRadius * _wheelRadius * _wheelMass * 0.5f;
         }
 
         public void GetWorldPose(out Vector3 position, out Quaternion rotation)
@@ -97,13 +108,48 @@ namespace OVP.VehicleSystems
             float suspensionForce = (_suspensionCompression * _suspensionSpring) + ((_suspensionCompression - _suspensionCompressionPrevious) * deltaTimeInverted * _suspensionDamper);
             _rigidbody.AddForceAtPosition(_localUp * suspensionForce, _position);
 
-            // TODO Forces for wheel rotation
+            // ===== ANGULAR VELOCITY =====
+            // acceleration = torque / moment of inertia => velocity = acceleration * time
+            AngularVelocity = AngularVelocity + (DriveTorque - _slipFeedbackForce) / WheelInertia * deltaTime;
+            // Sign needed for zero cross detection
+            float signedAngularVelocity = Mathf.Sign(AngularVelocity);
+            // Brake torque always in opposite direction of rotation
+            AngularVelocity = AngularVelocity - (signedAngularVelocity * BrakeTorque) / WheelInertia * deltaTime;
 
-            // ===== ROTATION =====
+            // Zero cross detection: If the angular velocity crosses 0, it indicates braking.
+            // To prevent undesired oscillation or oscillatory behavior and achieve a complete stop,
+            // we set the angular velocity to 0 and mark the wheel as locked.
+            if (Mathf.Sign(AngularVelocity) != signedAngularVelocity)
+            {
+                AngularVelocity = 0.0f;
+                _isLocked = true;
+            }
+            else
+            {
+                _isLocked = false;
+            }
+
+            // ===== WHEEL ROTATION =====
             _wheelRotation = _wheelRotation + AngularVelocity * Mathf.Rad2Deg * deltaTime;
             _wheelRotation = Mathf.Repeat(_wheelRotation, 360.0f); // Make it stay in 0-360
 
-            // TODO SLIP X and Z calculations
+
+
+            // TODO SLIP X and Z calculations   //
+            //                                  //
+            //                                  //
+            //                                  //
+            //                                  //
+            //                                  //
+            //                                  //
+            //                                  //
+            //                                  //
+            // -------------------------------- //
+
+
+
+            // ===== TIRE LOAD =====
+            float load = Mathf.Max(suspensionForce, 0.0f);
 
             // ===== COMBINED SLIP =====
             Vector2 combinedTireSlip = Vector2.ClampMagnitude(new Vector2(_slipX, _slipZ), 1.0f);
@@ -112,8 +158,10 @@ namespace OVP.VehicleSystems
             Vector3 forward = Vector3.ProjectOnPlane(_localForward, _raycastHit.normal).normalized;
             Vector3 right = Vector3.ProjectOnPlane(_localRight, _raycastHit.normal).normalized;
 
+            _slipFeedbackForce = combinedTireSlip.y * load * _wheelRadius;
+
             // ===== TIRE FORCE =====
-            if (_isGrounded) _rigidbody.AddForceAtPosition(forward * combinedTireSlip.y * suspensionForce + right * combinedTireSlip.x * suspensionForce, _wheelPosition);
+            if (_isGrounded) _rigidbody.AddForceAtPosition(forward * combinedTireSlip.y * load + right * combinedTireSlip.x * load, _wheelPosition);
         }
     }
 }
