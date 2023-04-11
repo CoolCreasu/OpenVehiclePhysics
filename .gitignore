@@ -70,3 +70,7 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Third party asset for debugging free on asset store
+/[Aa]ssets/[Dd]ebugGUI/*
+/[Aa]ssets/[Dd]ebugGUI/
