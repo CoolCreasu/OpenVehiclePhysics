@@ -1,4 +1,5 @@
 using OVP.Input;
+using TMPro;
 using UnityEngine;
 
 namespace OVP.VehicleSystems
@@ -8,6 +9,11 @@ namespace OVP.VehicleSystems
     /// </summary>
     public class CarController : MonoBehaviour
     {
+        [SerializeField] private bool _showText = false;
+        [SerializeField] private TextMeshProUGUI _text1 = default;
+        //[SerializeField] private TextMeshProUGUI _text2 = default;
+        //[SerializeField] private TextMeshProUGUI _text3 = default;
+
         [SerializeField] private CustomWheelCollider _wheelColliderFL = default; // Front left wheel collider
         [SerializeField] private CustomWheelCollider _wheelColliderFR = default; // Front right wheel collider
         [SerializeField] private CustomWheelCollider _wheelColliderRL = default; // Rear left wheel collider
@@ -68,6 +74,14 @@ namespace OVP.VehicleSystems
         private void FixedUpdate()
         {
             if (!_engine || !_clutch || !_gearbox || !_differential) return;
+
+            if (_showText)
+            {
+                _text1.text =
+                    $"Engine RPM = {_engine.EngineRPM}\n" +
+                    $"Engine angular velocity = {_engine.EngineAngularVelocity}\n" +
+                    $"Gear = {_gearbox.GetGear()}";
+            }
 
             // BrakeTorque
             _wheelColliderFL.BrakeTorque = 8000 * InputManager.Instance.InputBrake;
