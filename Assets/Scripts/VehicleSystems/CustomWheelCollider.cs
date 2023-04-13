@@ -33,6 +33,7 @@ namespace OVP.VehicleSystems
         private float _slipZ = 0.0f; // Slip value in the Z-axis (direction of travel)
         private float _slipX = 0.0f; // Slip value in the X-axis (direction perpendicular to travel)
         private float _forceZ = 0.0f; // Force applied in the Z-axis (direction of travel)
+        [DebugGUIGraph(min:-1.0f, max:1.0f, autoScale: false, r: 0.5f, g: 0.5f, b: 1.0f)]
         private float _slipAngle = 0.0f; // Slip angle of the wheel
         private float _slipAnglePeak = 8.0f; // Peak slip angle of the wheel
         private float _slipAngleDynamic = 0.0f; // Dynamic slip angle of the wheel
@@ -46,6 +47,9 @@ namespace OVP.VehicleSystems
         private float _suspensionCompressionPrevious = 0.0f; // Previous compression of the suspension
         private float _suspensionForceSpring = 0.0f; // Spring force applied by the suspension
         private float _suspensionForceDamper = 0.0f; // Damping force applied by the suspension
+
+        [DebugGUIGraph(min: 0.0f, max: 5000.0f, autoScale: false)]
+        private float _load = 0.0f;
 
         private float _deltaTime = 0.0f; // Delta time for physics update
         private float _deltaTimeInverted = 0.0f; // Inverted delta time for physics update
@@ -294,7 +298,7 @@ namespace OVP.VehicleSystems
         private void CalculateCombinedTireForce()
         {
             // Calculate the effective load on the tire, which is the maximum value between suspension force spring and suspension force damper
-            float load = Mathf.Max(_suspensionForceSpring + _suspensionForceDamper, 0.0f);
+            _load = Mathf.Max(_suspensionForceSpring + _suspensionForceDamper, 0.0f);
             // Calculate the combined tire slip as a Vector2, clamped to a magnitude of 1.0f, based on slipX and slipZ
             Vector2 combinedTireSlip = Vector2.ClampMagnitude(new Vector2(_slipX, _slipZ), 1.0f);
             // Calculate the forward and right directions of the wheel, projected onto the plane defined by the ground contact normal, and normalized
@@ -302,10 +306,10 @@ namespace OVP.VehicleSystems
             Vector3 right = Vector3.ProjectOnPlane(_dirRight, _raycastHit.normal).normalized;
 
             // Calculate the force along the Z-axis (forward direction) based on combined tire slip and the effective load on the tire
-            _forceZ = combinedTireSlip.y * load;
+            _forceZ = combinedTireSlip.y * _load;
             // Calculate the force along the forward and right directions based on combined tire slip, effective load on the tire, and corresponding directions
-            Vector3 forceForward = forward * combinedTireSlip.y * load;
-            Vector3 forceRight = right * combinedTireSlip.x * load;
+            Vector3 forceForward = forward * combinedTireSlip.y * _load;
+            Vector3 forceRight = right * combinedTireSlip.x * _load;
             // Apply the combined tire force to the wheel's position if the wheel is grounded
             if (_isGrounded)
             {

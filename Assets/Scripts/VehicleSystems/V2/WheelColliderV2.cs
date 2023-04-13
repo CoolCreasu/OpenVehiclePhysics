@@ -1,3 +1,4 @@
+using OVP.Utilities;
 using UnityEngine;
 
 namespace OVP.VehicleSystems
@@ -25,6 +26,9 @@ namespace OVP.VehicleSystems
         private float _slipX = 0.0f;
         private float _slipZ = 0.0f;
         private float _slipFeedbackForce = 0.0f;
+        private float _slipAngle = 0.0f;
+        private float _slipAnglePeak = 8.0f;
+        private float _slipAngleDynamic = 0.0f;
 
         private float _wheelRotation = 0.0f;
         private Vector3 _localVelocity = Vector3.zero;
@@ -108,6 +112,9 @@ namespace OVP.VehicleSystems
             float suspensionForce = (_suspensionCompression * _suspensionSpring) + ((_suspensionCompression - _suspensionCompressionPrevious) * deltaTimeInverted * _suspensionDamper);
             _rigidbody.AddForceAtPosition(_localUp * suspensionForce, _position);
 
+            // ===== TIRE LOAD =====
+            float load = Mathf.Max(suspensionForce, 0.0f);
+
             // ===== ANGULAR VELOCITY =====
             // acceleration = torque / moment of inertia => velocity = acceleration * time
             AngularVelocity = AngularVelocity + (DriveTorque - _slipFeedbackForce) / WheelInertia * deltaTime;
@@ -136,20 +143,19 @@ namespace OVP.VehicleSystems
 
 
             // TODO SLIP X and Z calculations   //
-            //                                  //
-            //                                  //
-            //                                  //
-            //                                  //
-            //                                  //
-            //                                  //
-            //                                  //
-            //                                  //
-            // -------------------------------- //
 
+            // ===== SLIP Z ===== //
+            float _slipZMax = Mathf.Clamp(MathExtensions.SafeDivide((AngularVelocity - (_localVelocity.z / _wheelRadius)) * deltaTimeInverted * WheelInertia, load * _wheelRadius), -1.0f, 1.0f);
+            float _actualSlip = _isLocked ? Mathf.Sign(_localVelocity.z) : _slipZMax;
+            _slipZ = _slipZ + (_actualSlip - _slipZ) * Mathf.Clamp01(Mathf.Abs(_localVelocity.z) / 0.01f * deltaTime);
+            _slipZ = Mathf.Clamp(_slipZ, -1.0f, 1.0f);
 
-
-            // ===== TIRE LOAD =====
-            float load = Mathf.Max(suspensionForce, 0.0f);
+            // ===== SLIP X ===== //
+            _slipAngle = Mathf.Atan2(-_localVelocity.x, Mathf.Abs(_localVelocity.z)) * Mathf.Rad2Deg;
+            float delta = (_localVelocity.x - 3.0f) / (6.0f - 3.0f);
+            _slipAngle = Mathf.Lerp(_slipAnglePeak * Mathf.Sign(-_localVelocity.x), _slipAngle, delta);
+            _slipAngleDynamic = _slipAngleDynamic + (_slipAngle - _slipAngleDynamic) * Mathf.Clamp01(Mathf.Abs(_localVelocity.x) / 0.01f * deltaTime);
+            _slipX = Mathf.Clamp(_slipAngleDynamic / _slipAnglePeak, -1.0f, 1.0f);
 
             // ===== COMBINED SLIP =====
             Vector2 combinedTireSlip = Vector2.ClampMagnitude(new Vector2(_slipX, _slipZ), 1.0f);
@@ -163,5 +169,17 @@ namespace OVP.VehicleSystems
             // ===== TIRE FORCE =====
             if (_isGrounded) _rigidbody.AddForceAtPosition(forward * combinedTireSlip.y * load + right * combinedTireSlip.x * load, _wheelPosition);
         }
+
+        /*
+        public float NormalizedLateralPacejka(float slipAngle)
+        {
+            float B = 20.0f;
+            float C = 2.0f;
+            float D = 2.0f;
+            float E = 0.3f;
+
+            return D * Mathf.Sin(C * Mathf.Atan(B * slipAngle - E * (B * slipAngle - Mathf.Atan(B * slipAngle))));
+        }
+        */
     }
 }

@@ -47,6 +47,12 @@ namespace OVP.VehicleSystems
 
             _wheelColliderFL.SteerAngle = _steeringValue;
             _wheelColliderFR.SteerAngle = _steeringValue;
+
+            _wheelColliderRL.DriveTorque = 1000.0f * InputManager.Instance.InputThrottle;
+            _wheelColliderRR.DriveTorque = 1000.0f * InputManager.Instance.InputThrottle;
+
+            _wheelColliderRL.BrakeTorque = 8000.0f * InputManager.Instance.InputBrake;
+            _wheelColliderRR.BrakeTorque = 8000.0f * InputManager.Instance.InputBrake;
             
             _wheelColliderFL.UpdatePhysics(deltaTime, deltaTimeInverted);
             _wheelColliderFR.UpdatePhysics(deltaTime, deltaTimeInverted);
