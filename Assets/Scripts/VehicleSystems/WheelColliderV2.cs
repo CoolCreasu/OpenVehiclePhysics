@@ -16,6 +16,8 @@ namespace OVP.VehicleSystems
         [SerializeField] private float _wheelMass = 20.0f;
         [SerializeField] private float _wheelRadius = 0.3f;
 
+        private float _frictionTorque = 0.0f;
+
         private float _wheelRotation = 0.0f;
 
         private float _suspensionCompression = 0.0f;
@@ -73,6 +75,30 @@ namespace OVP.VehicleSystems
             _rigidbody.AddForceAtPosition(wheelUp * suspensionForce, wheelPosition);
 
             float load = Mathf.Max(suspensionForce, 0.0f);
+
+            ///// SLIP -----------------
+
+            AngularVelocity = AngularVelocity + ((DriveTorque - _frictionTorque) / WheelInertia * deltaTime);
+
+            float slipRatio = MathExtensions.SafeDivide(Mathf.Abs(AngularVelocity * _wheelRadius) - localVelocity.z, Mathf.Abs(localVelocity.z));
+            //float slipRatio = MathExtensions.SafeDivide(AngularVelocity * _wheelRadius, localVelocity.z) - 1.0f;
+            float longitudinalPacejka = Pacejka(slipRatio, 10.0f, 1.9f, 1.0f, 0.97f);
+
+            Vector3 forward = Vector3.ProjectOnPlane(wheelForward, raycastHit.normal);
+            Vector3 force = longitudinalPacejka * forward * load;
+
+            _frictionTorque = longitudinalPacejka * load * _wheelRadius;
+
+            force = Vector3.ClampMagnitude(force, load);
+
+            _rigidbody.AddForceAtPosition(force, wheelPosition);
+
+            //Debug.Log(slipRatio);
+        }
+
+        private float Pacejka(float slip, float B, float C, float D, float E)
+        {
+            return D * Mathf.Sin(C * Mathf.Atan(B * slip - E * (B * slip - Mathf.Atan(B * slip))));
         }
 
         private void OnDrawGizmosSelected()
