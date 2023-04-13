@@ -9757,7 +9757,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Car
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 609376919697867445, guid: 742fff6235e1980498e2dec95fb2dcfe, type: 3}
+    - {fileID: 6053960940435628345, guid: 742fff6235e1980498e2dec95fb2dcfe, type: 3}
+    - {fileID: 2888313984053694281, guid: 742fff6235e1980498e2dec95fb2dcfe, type: 3}
+    - {fileID: 7495372278668445998, guid: 742fff6235e1980498e2dec95fb2dcfe, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 742fff6235e1980498e2dec95fb2dcfe, type: 3}
 --- !u!1 &1555697507
 GameObject:

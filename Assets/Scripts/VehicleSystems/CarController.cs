@@ -8,10 +8,10 @@ namespace OVP.VehicleSystems
     /// </summary>
     public class CarController : MonoBehaviour
     {
-        [SerializeField] private WheelColliderV2 _wheelColliderFL = default; // Front left wheel collider
-        [SerializeField] private WheelColliderV2 _wheelColliderFR = default; // Front right wheel collider
-        [SerializeField] private WheelColliderV2 _wheelColliderRL = default; // Rear left wheel collider
-        [SerializeField] private WheelColliderV2 _wheelColliderRR = default; // Rear right wheel collider
+        [SerializeField] private WheelColliderV3 _wheelColliderFL = default; // Front left wheel collider
+        [SerializeField] private WheelColliderV3 _wheelColliderFR = default; // Front right wheel collider
+        [SerializeField] private WheelColliderV3 _wheelColliderRL = default; // Rear left wheel collider
+        [SerializeField] private WheelColliderV3 _wheelColliderRR = default; // Rear right wheel collider
 
         [SerializeField] private Engine _engine = default;
         [SerializeField] private Clutch _clutch = default;
