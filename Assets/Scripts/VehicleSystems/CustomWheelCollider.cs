@@ -19,6 +19,8 @@ namespace OVP.VehicleSystems
         [SerializeField] private float _wheelMass = 20.0f; // Mass of the wheel
         [SerializeField] private float _wheelRadius = 0.5f; // Radius of the wheel
 
+        [SerializeField] private AnimationCurve _pacejkaCurve = default;
+
         private float _wheelInertia = 0.0f; // Inertia of the wheel
         private float _wheelRotation = 0.0f; // Current rotation of the wheel
         private Vector3 _localVelocity = Vector3.zero; // The local velocity of the wheel
@@ -33,6 +35,8 @@ namespace OVP.VehicleSystems
         private float _slipAnglePeak = 8.0f; // Peak slip angle of the wheel
         private float _slipAngleDynamic = 0.0f; // Dynamic slip angle of the wheel
         private float _longitudinalSlipVelocity = 0.0f; // Longitudinal slip velocity of the wheel
+
+        private float _fricionCoefficientX = 0.0f;
 
         private RaycastHit _raycastHit = default; // RaycastHit used for detecting ground
         private float _suspensionCompression = 0.0f; // Current compression of the suspension
@@ -229,6 +233,13 @@ namespace OVP.VehicleSystems
             _slipAngleDynamic = Mathf.Clamp(_slipAngleDynamic + ((slipAngle - _slipAngleDynamic) * Mathf.Clamp01(Mathf.Abs(_localVelocity.x) / 0.01f * _deltaTime)), -90.0f, 90.0f);
             // Calculate slipX, which is the lateral slip, based on slip angle dynamic and slip angle peak, clamped between -1.0f and 1.0f
             _slipX = Mathf.Clamp(MathExtensions.SafeDivide(_slipAngleDynamic, _slipAnglePeak), -1.0f, 1.0f);
+            //_slipX = Mathf.Sign(_slipAngleDynamic) * _pacejkaCurve.Evaluate(Mathf.Abs(_slipAngleDynamic));
+            _fricionCoefficientX = pacejkaX(_slipAngleDynamic);
+        }
+
+        private float pacejkaX(float slip, float B = 10.0f, float C = 1.9f, float D = 1.0f, float E = 0.97f)
+        {
+            return D * Mathf.Sin(C * Mathf.Atan(B * slip - E * (B * slip - Mathf.Atan(B * slip))));
         }
 
         /// <summary>
@@ -248,6 +259,9 @@ namespace OVP.VehicleSystems
             // Calculate the force along the forward and right directions based on combined tire slip, effective load on the tire, and corresponding directions
             Vector3 forceForward = forward * combinedTireSlip.y * load;
             Vector3 forceRight = right * combinedTireSlip.x * load;
+
+            //Vector3 frictionForce = Vector3.ClampMagnitude(forward * _slipZ + right * _fricionCoefficientX, 1.0f) * load;
+
             // Apply the combined tire force to the wheel's position if the wheel is grounded
             if (_isGrounded)
             {

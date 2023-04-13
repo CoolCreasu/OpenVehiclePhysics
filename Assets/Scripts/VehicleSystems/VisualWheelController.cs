@@ -7,7 +7,7 @@ namespace OVP.VehicleSystems
     /// </summary>
     public class VisualWheelController : MonoBehaviour
     {
-        [SerializeField] private CustomWheelCollider _customWheelCollider = default; // Reference to the CustomWheelCollider
+        [SerializeField] private WheelColliderV2 _customWheelCollider = default; // Reference to the CustomWheelCollider
 
         private void Awake()
         {
