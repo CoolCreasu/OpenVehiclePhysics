@@ -97,7 +97,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11e187e83f335664c81688da2eb813e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _customWheelCollider: {fileID: 7430269372387440341}
+  _customWheelCollider: {fileID: 3278888400345147854}
 --- !u!1 &626863202816161694
 GameObject:
   m_ObjectHideFlags: 0
@@ -138,7 +138,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 626863202816161694}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 42eda0811ee84144496a4c46ea13376d, type: 3}
   m_Name: 
@@ -154,6 +154,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  B: 0.91
+  tau: 0.02
 --- !u!114 &6965811197135123740
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -161,7 +163,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 626863202816161694}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a0d20844b22765d41b1c6de7e2847b83, type: 3}
   m_Name: 
@@ -171,7 +173,6 @@ MonoBehaviour:
   _suspensionDamper: 4500
   _wheelMass: 20
   _wheelRadius: 0.36
-  _longSlipModifier: 1.5
 --- !u!1 &630036507439380656
 GameObject:
   m_ObjectHideFlags: 0
@@ -352,7 +353,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11e187e83f335664c81688da2eb813e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _customWheelCollider: {fileID: 6447178278008006391}
+  _customWheelCollider: {fileID: 6668664498606386008}
 --- !u!1 &2985740477729725659
 GameObject:
   m_ObjectHideFlags: 0
@@ -533,7 +534,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11e187e83f335664c81688da2eb813e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _customWheelCollider: {fileID: 6965811197135123740}
+  _customWheelCollider: {fileID: 4208910982825511363}
 --- !u!1 &3364999428657934139
 GameObject:
   m_ObjectHideFlags: 0
@@ -714,7 +715,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11e187e83f335664c81688da2eb813e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _customWheelCollider: {fileID: 1319009432338281493}
+  _customWheelCollider: {fileID: 2033904379810209233}
 --- !u!1 &3802177859736055060
 GameObject:
   m_ObjectHideFlags: 0
@@ -838,7 +839,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3912828013887172338}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 42eda0811ee84144496a4c46ea13376d, type: 3}
   m_Name: 
@@ -854,6 +855,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  B: 0.91
+  tau: 0.02
 --- !u!114 &7430269372387440341
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -861,7 +864,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3912828013887172338}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a0d20844b22765d41b1c6de7e2847b83, type: 3}
   m_Name: 
@@ -871,7 +874,6 @@ MonoBehaviour:
   _suspensionDamper: 4500
   _wheelMass: 20
   _wheelRadius: 0.36
-  _longSlipModifier: 1.5
 --- !u!1 &5043674498281399112
 GameObject:
   m_ObjectHideFlags: 0
@@ -912,7 +914,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5043674498281399112}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 42eda0811ee84144496a4c46ea13376d, type: 3}
   m_Name: 
@@ -928,6 +930,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  B: 0.91
+  tau: 0.02
 --- !u!114 &6447178278008006391
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -935,7 +939,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5043674498281399112}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a0d20844b22765d41b1c6de7e2847b83, type: 3}
   m_Name: 
@@ -945,7 +949,6 @@ MonoBehaviour:
   _suspensionDamper: 4500
   _wheelMass: 20
   _wheelRadius: 0.36
-  _longSlipModifier: 1.5
 --- !u!1 &5560700057097271614
 GameObject:
   m_ObjectHideFlags: 0
@@ -986,7 +989,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5560700057097271614}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 42eda0811ee84144496a4c46ea13376d, type: 3}
   m_Name: 
@@ -1002,6 +1005,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  B: 0.91
+  tau: 0.02
 --- !u!114 &1319009432338281493
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1009,7 +1014,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5560700057097271614}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a0d20844b22765d41b1c6de7e2847b83, type: 3}
   m_Name: 
@@ -1019,7 +1024,6 @@ MonoBehaviour:
   _suspensionDamper: 4500
   _wheelMass: 20
   _wheelRadius: 0.36
-  _longSlipModifier: 1.5
 --- !u!1 &8165188034343752409
 GameObject:
   m_ObjectHideFlags: 0
@@ -1188,10 +1192,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99dc9176d6664c0418d34947c127acda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _wheelColliderFL: {fileID: 6447178278008006391}
-  _wheelColliderFR: {fileID: 7430269372387440341}
-  _wheelColliderRL: {fileID: 6965811197135123740}
-  _wheelColliderRR: {fileID: 1319009432338281493}
+  _wheelColliderFL: {fileID: 6668664498606386008}
+  _wheelColliderFR: {fileID: 3278888400345147854}
+  _wheelColliderRL: {fileID: 4208910982825511363}
+  _wheelColliderRR: {fileID: 2033904379810209233}
   _engine: {fileID: 3308995208605367260}
   _clutch: {fileID: 4019060646300111314}
   _gearbox: {fileID: 6606211554019954778}

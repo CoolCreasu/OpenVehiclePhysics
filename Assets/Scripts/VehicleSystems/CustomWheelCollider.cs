@@ -19,8 +19,6 @@ namespace OVP.VehicleSystems
         [SerializeField] private float _wheelMass = 20.0f; // Mass of the wheel
         [SerializeField] private float _wheelRadius = 0.5f; // Radius of the wheel
 
-        [SerializeField] private AnimationCurve _pacejkaCurve = default;
-
         private float _wheelInertia = 0.0f; // Inertia of the wheel
         private float _wheelRotation = 0.0f; // Current rotation of the wheel
         private Vector3 _localVelocity = Vector3.zero; // The local velocity of the wheel
@@ -38,6 +36,15 @@ namespace OVP.VehicleSystems
 
         private float _fricionCoefficientX = 0.0f;
 
+
+        // NEW
+
+        private float _slipRatioDifferential = 0.0f;
+        [SerializeField] private float B = 0.91f;
+        [SerializeField] private float tau = 0.02f;
+
+        // END OF NEW
+
         private RaycastHit _raycastHit = default; // RaycastHit used for detecting ground
         private float _suspensionCompression = 0.0f; // Current compression of the suspension
         private float _suspensionCompressionPrevious = 0.0f; // Previous compression of the suspension
@@ -49,7 +56,8 @@ namespace OVP.VehicleSystems
 
         public float DriveTorque { get; set; } = 0.0f; // Drive torque applied to the wheel
         public float BrakeTorque { get; set; } = 0.0f; // Brake torque applied to the wheel
-        public float WheelAngularVelocity { get; private set; } = 0.0f; // Angular velocity of the wheel
+        //public float WheelAngularVelocity { get; private set; } = 0.0f; // Angular velocity of the wheel
+        public float WheelAngularVelocity = 0.0f;
 
         private void Awake()
         {
@@ -202,6 +210,7 @@ namespace OVP.VehicleSystems
         /// </summary>
         private void CalculateSlipZ()
         {
+            /*
             // Calculate target angular velocity based on local velocity and wheel radius
             float targetAngularVelocity = _localVelocity.z / _wheelRadius;
             // Calculate target angular acceleration based on the difference between current and target angular velocities, and inverse of delta time
@@ -216,6 +225,15 @@ namespace OVP.VehicleSystems
             float actualSlip = _isLocked ? Mathf.Sign(_longitudinalSlipVelocity) : slipZMax;
             // Update slipZ based on actual slip and longitudinal slip velocity, clamped with a time-based interpolation factor
             _slipZ += (actualSlip - _slipZ) * Mathf.Clamp01(Mathf.Abs(_longitudinalSlipVelocity) / 0.005f * _deltaTime);
+            */
+            float wheelSpeed = WheelAngularVelocity * _wheelRadius;
+            float delta = (WheelAngularVelocity - _localVelocity.z) - Mathf.Abs(_localVelocity.z) * _slipRatioDifferential;
+            delta = delta / B;
+            _slipRatioDifferential = _slipRatioDifferential + delta * Time.fixedDeltaTime;
+            float realTau = tau;
+            if (_localVelocity.z > 5.0f) realTau = 0.0f;
+            float slipRatio = _slipRatioDifferential + realTau * delta;
+            _slipZ = pacejka(slipRatio);
         }
 
         /// <summary>
@@ -234,10 +252,10 @@ namespace OVP.VehicleSystems
             // Calculate slipX, which is the lateral slip, based on slip angle dynamic and slip angle peak, clamped between -1.0f and 1.0f
             _slipX = Mathf.Clamp(MathExtensions.SafeDivide(_slipAngleDynamic, _slipAnglePeak), -1.0f, 1.0f);
             //_slipX = Mathf.Sign(_slipAngleDynamic) * _pacejkaCurve.Evaluate(Mathf.Abs(_slipAngleDynamic));
-            _fricionCoefficientX = pacejkaX(_slipAngleDynamic);
+            _fricionCoefficientX = pacejka(_slipAngleDynamic);
         }
 
-        private float pacejkaX(float slip, float B = 10.0f, float C = 1.9f, float D = 1.0f, float E = 0.97f)
+        private float pacejka(float slip, float B = 10.0f, float C = 1.9f, float D = 1.0f, float E = 0.97f)
         {
             return D * Mathf.Sin(C * Mathf.Atan(B * slip - E * (B * slip - Mathf.Atan(B * slip))));
         }

@@ -8,10 +8,10 @@ namespace OVP.VehicleSystems
     /// </summary>
     public class CarController : MonoBehaviour
     {
-        [SerializeField] private WheelColliderV2 _wheelColliderFL = default; // Front left wheel collider
-        [SerializeField] private WheelColliderV2 _wheelColliderFR = default; // Front right wheel collider
-        [SerializeField] private WheelColliderV2 _wheelColliderRL = default; // Rear left wheel collider
-        [SerializeField] private WheelColliderV2 _wheelColliderRR = default; // Rear right wheel collider
+        [SerializeField] private CustomWheelCollider _wheelColliderFL = default; // Front left wheel collider
+        [SerializeField] private CustomWheelCollider _wheelColliderFR = default; // Front right wheel collider
+        [SerializeField] private CustomWheelCollider _wheelColliderRL = default; // Rear left wheel collider
+        [SerializeField] private CustomWheelCollider _wheelColliderRR = default; // Rear right wheel collider
 
         [SerializeField] private Engine _engine = default;
         [SerializeField] private Clutch _clutch = default;
@@ -76,40 +76,33 @@ namespace OVP.VehicleSystems
 
             float deltaTime = Time.fixedDeltaTime;
 
-            /*
+            
             // BrakeTorque
             _wheelColliderFL.BrakeTorque = 8000 * InputManager.Instance.InputBrake;
             _wheelColliderFR.BrakeTorque = 8000 * InputManager.Instance.InputBrake;
             _wheelColliderRL.BrakeTorque = 8000 * InputManager.Instance.InputBrake;
             _wheelColliderRR.BrakeTorque = 8000 * InputManager.Instance.InputBrake;
-            */
 
-            _wheelColliderFL.SteerAngle = _steeringvalue * (_wheelBase / (_wheelBase + _trackWidth *  Mathf.Sign(_steeringvalue) * 0.5f));
-            _wheelColliderFR.SteerAngle = _steeringvalue * (_wheelBase / (_wheelBase + _trackWidth * -Mathf.Sign(_steeringvalue) * 0.5f));
-
-            /*
-            float deltaTime = Time.fixedDeltaTime; // Get the time since last fixed update
+            //_wheelColliderFL.SteerAngle = _steeringvalue * (_wheelBase / (_wheelBase + _trackWidth *  Mathf.Sign(_steeringvalue) * 0.5f));
+            //_wheelColliderFR.SteerAngle = _steeringvalue * (_wheelBase / (_wheelBase + _trackWidth * -Mathf.Sign(_steeringvalue) * 0.5f));
 
             // Torque stream
             _engine.UpdatePhysics(deltaTime, InputManager.Instance.InputThrottle, _clutch.ClutchTorque);
             float value = _gearbox.GetOutputTorque(_clutch.ClutchTorque);
             _wheelColliderRL.DriveTorque = _differential.GetOutputTorqueLeft(value);
             _wheelColliderRR.DriveTorque = _differential.GetOutputTorqueRight(value);
-            */
 
             // Update physics for each wheel collider
-            //_wheelColliderFL.UpdatePhysics(deltaTime);
-            //_wheelColliderFR.UpdatePhysics(deltaTime);
-            //_wheelColliderRL.UpdatePhysics(deltaTime);
-            //_wheelColliderRR.UpdatePhysics(deltaTime);
+            _wheelColliderFL.UpdatePhysics(deltaTime);
+            _wheelColliderFR.UpdatePhysics(deltaTime);
+            _wheelColliderRL.UpdatePhysics(deltaTime);
+            _wheelColliderRR.UpdatePhysics(deltaTime);
 
-            /*
             // Velocity stream
             value = _differential.GetInputShaftVelocity(_wheelColliderRL.WheelAngularVelocity, _wheelColliderRR.WheelAngularVelocity);
             value = _gearbox.GetInputShaftVelocity(value);
             _clutch.UpdatePhysics(value, _engine.EngineAngularVelocity, _gearbox.GetGear());
             _engine.UpdatePhysics(deltaTime, InputManager.Instance.InputThrottle, _clutch.ClutchTorque);
-            */
         }
 
         private void OnGearUp()
